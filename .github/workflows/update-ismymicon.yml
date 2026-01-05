@@ -1,0 +1,38 @@
+name: Update ismymicon cask
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update cask
+        env:
+          REPO: hackthehackerman/isMyMicOn
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag=$(curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO/releases/latest" | jq -r .tag_name)
+          if [ -z "$tag" ] || [ "$tag" = "null" ]; then
+            echo "Failed to fetch latest tag"
+            exit 1
+          fi
+          version="${tag#v}"
+          url="https://github.com/$REPO/releases/download/$tag/IsMyMicOn.zip"
+          curl -sL "$url" -o /tmp/IsMyMicOn.zip
+          sha=$(sha256sum /tmp/IsMyMicOn.zip | awk '{print $1}')
+          sed -i "s/^  version .*/  version \"${version}\"/" Casks/ismymicon.rb
+          sed -i "s/^  sha256 .*/  sha256 \"${sha}\"/" Casks/ismymicon.rb
+          if git diff --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "bump ismymicon to ${version}"
+          git push
