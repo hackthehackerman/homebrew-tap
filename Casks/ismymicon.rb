@@ -1,6 +1,6 @@
 cask "ismymicon" do
-  version "0.1.1"
-  sha256 "b7616468e1e4ba83557c1735edbd795685140b7b53253201557aecdd53bb97d1"
+  version "0.1.2"
+  sha256 "13df3b916c7d29e20a7da902fdc1f41bfe58e404ac1aba7469ff1ca31507972e"
 
   url "https://github.com/hackthehackerman/isMyMicOn/releases/download/v#{version}/IsMyMicOn.zip"
   name "IsMyMicOn"
